@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Panel de Control - Pachoncito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-glow: #00f3ff;
+            --secondary-glow: #0066ff;
+            --bg-dark: #050810;
+            --bg-card: rgba(0, 243, 255, 0.03);
+            --text-main: #e0f7ff;
+            --text-dim: #8ba4b6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 50%, #000000 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            min-height: 100vh;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* ---------- PANEL IZQUIERDO ---------- */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 1rem;
+            border-right: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .welcome-section {
+            text-align: left;
+            margin-bottom: 2.5rem;
+            animation: fadeInLeft 1s ease-out;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--primary-glow);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-glow);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-glow);
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff, var(--primary-glow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle { color: var(--text-dim); font-size: 1rem; font-weight: 300; }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            width: 100%;
+            margin-bottom: 2.5rem;
+            animation: fadeInLeft 1s ease-out 0.3s both;
+        }
+
+        .link-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        .link-card:hover::before { left: 100%; }
+        .link-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-glow);
+            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.05);
+        }
+
+        .link-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-glow);
+            transition: transform 0.3s ease;
+        }
+        .link-card:hover .link-icon { transform: scale(1.1); text-shadow: 0 0 15px var(--primary-glow); }
+
+        .link-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+        .link-desc { font-size: 0.7rem; color: var(--text-dim); }
+
+        .search-section { width: 100%; animation: fadeInLeft 1s ease-out 0.6s both; }
+
+        .search-form {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 50px;
+            padding: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.05);
+        }
+        .search-form:focus-within { border-color: var(--primary-glow); box-shadow: 0 0 30px rgba(0, 243, 255, 0.2); }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .search-input::placeholder { color: var(--text-dim); }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--secondary-glow), var(--primary-glow));
+            border: none;
+            border-radius: 50%;
+            width: 42px; height: 42px;
+            color: #000;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .search-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--primary-glow); }
+
+        /* ---------- PANEL DERECHO ---------- */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.3rem;
+            animation: fadeInRight 1s ease-out 0.2s both;
+        }
+
+        .clock-container { text-align: center; position: relative; }
+
+        .clock-time {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4.6rem;
+            font-weight: 700;
+            color: var(--primary-glow);
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.6), 0 0 40px rgba(0, 243, 255, 0.3);
+            letter-spacing: 4px;
+            line-height: 1;
+        }
+
+        .clock-date {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        /* Fila: perrito + nota rápida */
+        .pet-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            max-width: 580px;
+        }
+
+        .gif-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 2px solid var(--primary-glow);
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2), inset 0 0 30px rgba(0, 243, 255, 0.1);
+        }
+
+        .gif-frame::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,243,255,0.03) 0px, rgba(0,243,255,0.03) 1px, transparent 1px, transparent 4px);
+            z-index: 2; pointer-events: none;
+        }
+
+        .gif-frame::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0,243,255,0.1) 50%, transparent 60%);
+            animation: scan 4s linear infinite;
+            z-index: 3; pointer-events: none;
+        }
+
+        .gif-frame img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) saturate(1.2) brightness(0.9);
+            transition: transform 0.5s ease;
+        }
+        .gif-frame:hover img { transform: scale(1.05); }
+
+        .gif-label {
+            position: absolute;
+            bottom: 12px; left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 4;
+            letter-spacing: 1px;
+        }
+
+        /* Nota rápida (estilo Jarvis) */
+        .notes-card {
+            display: flex;
+            flex-direction: column;
+            aspect-ratio: 1 / 1;
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 243, 255, 0.35);
+            border-radius: 20px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.04);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .notes-card:focus-within {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.25), inset 0 0 20px rgba(0, 243, 255, 0.06);
+        }
+
+        .notes-title {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--primary-glow);
+            margin-bottom: 0.7rem;
+        }
+
+        .notes-card textarea {
+            flex: 1;
+            width: 100%;
+            resize: none;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.7rem;
+            outline: none;
+        }
+        .notes-card textarea::placeholder { color: var(--text-dim); }
+
+        .notes-saved {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 1px;
+            color: var(--primary-glow);
+            height: 1em;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .notes-saved.show { opacity: 1; }
+
+        /* Video */
+        .video-container {
+            width: 100%;
+            max-width: 580px;
+            border: 2px solid var(--primary-glow);
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            position: relative;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: none;
+            display: block;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            z-index: 10;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        .video-open {
+            display: block;
+            text-align: center;
+            margin-top: -0.6rem;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-decoration: none;
+        }
+        .video-open:hover { color: var(--primary-glow); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+        @media (max-width: 1200px) {
+            .links-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 1024px) {
+            .main-container { grid-template-columns: 1fr; }
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+                padding-right: 0;
+                padding-bottom: 2rem;
+            }
+            .clock-time { font-size: 4rem; }
+        }
+
+        @media (max-width: 600px) {
+            .links-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
+            .clock-time { font-size: 3rem; }
+            .main-container { padding: 1rem; }
+            .pet-row { grid-template-columns: 1fr; }
+            .notes-card { aspect-ratio: auto; min-height: 220px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- ===== IZQUIERDA ===== -->
+        <div class="left-panel">
+            <div class="welcome-section">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    SISTEMA EN LÍNEA
+                </div>
+                <h1>Bienvenido, Pachoncito</h1>
+                <p class="subtitle">Panel de control personalizado listo para su uso.</p>
+            </div>
+
+            <div class="links-grid">
+                <a href="https://chat.qwen.ai/" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-solid fa-robot"></i></div>
+                    <div class="link-title">Qwen AI</div>
+                    <div class="link-desc">Asistente de Inteligencia Artificial</div>
+                </a>
+
+                <a href="https://estudiante.upn.edu.pe/inicio" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div class="link-title">Portal UPN</div>
+                    <div class="link-desc">Intranet Estudiantil</div>
+                </a>
+
+                <a href="https://claude.ai/new" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <div class="link-title">Claude AI</div>
+                    <div class="link-desc">Nuevo chat de Claude</div>
+                </a>
+
+                <a href="https://www.youtube.com/watch?v=Gp-lWgUDcKk&list=RDGMEMWO-g6DgCWEqKlDtKbJA1GwVMGp-lWgUDcKk&start_radio=1" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-brands fa-youtube"></i></div>
+                    <div class="link-title">YouTube</div>
+                    <div class="link-desc">Radio de música personalizada</div>
+                </a>
+
+                <a href="https://github.com/Pachakochter" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-brands fa-github"></i></div>
+                    <div class="link-title">GitHub</div>
+                    <div class="link-desc">Tu perfil de desarrollador</div>
+                </a>
+
+                <a href="https://www.netacad.com/dashboard" target="_blank" class="link-card">
+                    <div class="link-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                    <div class="link-title">NetAcad</div>
+                    <div class="link-desc">Cisco Networking Academy</div>
+                </a>
+            </div>
+
+            <div class="search-section">
+                <form action="https://www.google.com/search" method="GET" class="search-form" target="_blank">
+                    <input type="text" name="q" class="search-input" placeholder="Buscar en Google..." autocomplete="off" required>
+                    <button type="submit" class="search-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== DERECHA ===== -->
+        <div class="right-panel">
+            <div class="clock-container">
+                <div class="clock-time" id="clock-time">00:00:00</div>
+                <div class="clock-date" id="clock-date">Cargando fecha...</div>
+            </div>
+
+            <!-- Perrito + Nota rápida -->
+            <div class="pet-row">
+                <div class="gif-frame">
+                    <img src="https://tse1.mm.bing.net/th/id/OIP.SwotVbfWsej9yfZr0YsQ6wAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Cachorro Pitbull">
+                    <div class="gif-label">● LIVE FEED: PITBULL PUPPY</div>
+                </div>
+
+                <div class="notes-card">
+                    <div class="notes-title"><i class="fa-solid fa-note-sticky"></i> NOTA RÁPIDA</div>
+                    <textarea id="notes" placeholder="Escribe aquí... se guarda solo."></textarea>
+                    <div class="notes-saved" id="notes-saved">✓ GUARDADO</div>
+                </div>
+            </div>
+
+            <!-- Video de YouTube - Autoplay -->
+            <div class="video-container">
+                <div class="video-label">▶ NOW PLAYING</div>
+                <iframe
+                    src="https://www.youtube.com/embed/kYHoSET3SGU?autoplay=1&mute=1&loop=1&playlist=kYHoSET3SGU&controls=1&rel=0&modestbranding=1&playsinline=1"
+                    title="Video"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <a class="video-open" href="https://www.youtube.com/watch?v=kYHoSET3SGU" target="_blank">Abrir video en YouTube ↗ · activa el sonido con el ícono de volumen del reproductor</a>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('clock-time').textContent = timeString;
+            document.getElementById('clock-date').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Nota rápida: se guarda en el navegador
+        const notes = document.getElementById('notes');
+        const savedTag = document.getElementById('notes-saved');
+        try { notes.value = localStorage.getItem('pachoncito_notes') || ''; } catch (e) {}
+        let timer;
+        notes.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                try { localStorage.setItem('pachoncito_notes', notes.value); } catch (e) {}
+                savedTag.classList.add('show');
+                setTimeout(() => savedTag.classList.remove('show'), 1500);
+            }, 400);
+        });
+
+        console.log("%c SISTEMA JARVIS INICIADO ", "background: #00f3ff; color: #000; font-weight: bold; padding: 4px; border-radius: 4px;");
+    </script>
+</body>
+</html>
