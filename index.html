@@ -358,12 +358,26 @@
             position: relative;
         }
 
-        .video-container iframe {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border: none;
-            display: block;
+        .video-container { aspect-ratio: 16 / 9; }
+        .video-container iframe,
+        .video-container #youtube-player {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            border: none; display: block;
         }
+
+        .sound-btn {
+            position: absolute; right: 10px; bottom: 10px; z-index: 10;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem; letter-spacing: 1px;
+            padding: 6px 12px; border-radius: 20px; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .sound-btn:hover { background: var(--primary-glow); color: #000; }
+        .sound-btn.hidden { display: none; }
 
         .video-label {
             position: absolute;
@@ -503,18 +517,13 @@
                 </div>
             </div>
 
-            <!-- Video de YouTube - Autoplay -->
+            <!-- Video de YouTube - Playlist rotativa -->
             <div class="video-container">
-                <div class="video-label">▶ NOW PLAYING</div>
-                <iframe
-                    src="https://www.youtube.com/embed/kYHoSET3SGU?autoplay=1&mute=1&loop=1&playlist=kYHoSET3SGU&controls=1&rel=0&modestbranding=1&playsinline=1"
-                    title="Video"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen>
-                </iframe>
+                <div class="video-label" id="video-label">▶ NOW PLAYING 1/10</div>
+                <div id="youtube-player"></div>
+                <button class="sound-btn" id="sound-btn">🔊 ACTIVAR SONIDO</button>
             </div>
-            <a class="video-open" href="https://www.youtube.com/watch?v=kYHoSET3SGU" target="_blank">Abrir video en YouTube ↗ · activa el sonido con el ícono de volumen del reproductor</a>
+            <a class="video-open" href="#" target="_blank" id="video-link">Ver este video en YouTube ↗</a>
         </div>
     </div>
 
@@ -543,7 +552,97 @@
             }, 400);
         });
 
+        // ===== Playlist rotativa de YouTube =====
+        const videoIds = [
+            'Gp-lWgUDcKk',  // 1
+            'kYHoSET3SGU',  // 2
+            '54fea7wuV6s',  // 3
+            'iLKoiq6Su-8',  // 4
+            'jrbw4h_RMP0',  // 5
+            '9vN534jMCUU',  // 6
+            'y7fudcFIlZs',  // 7
+            'kAnqVEzQegs',  // 8
+            '-EmfweH9xVw',  // 9
+            'uLMGaNmvGoc'   // 10
+        ];
+
+        let currentVideoIndex = 0;
+        let player;
+        let unmuted = false;
+        let errorCount = 0;
+        const soundBtn = document.getElementById('sound-btn');
+
+        const ytTag = document.createElement('script');
+        ytTag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(ytTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: videoIds[0],
+                playerVars: {
+                    autoplay: 1,
+                    mute: 1,          // necesario: los navegadores bloquean autoplay con sonido
+                    controls: 1,
+                    rel: 0,
+                    modestbranding: 1,
+                    playsinline: 1
+                },
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange,
+                    onError: onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.mute();
+            event.target.playVideo();
+            updateVideoInfo();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) errorCount = 0;
+            if (event.data === YT.PlayerState.ENDED) nextVideo();
+        }
+
+        // Si un video no se puede incrustar o no existe, salta al siguiente
+        function onPlayerError() {
+            errorCount++;
+            if (errorCount < videoIds.length) nextVideo();
+        }
+
+        function nextVideo() {
+            currentVideoIndex = (currentVideoIndex + 1) % videoIds.length;
+            player.loadVideoById(videoIds[currentVideoIndex]);
+            updateVideoInfo();
+        }
+
+        function updateVideoInfo() {
+            document.getElementById('video-link').href =
+                'https://www.youtube.com/watch?v=' + videoIds[currentVideoIndex];
+            document.getElementById('video-label').textContent =
+                '▶ NOW PLAYING ' + (currentVideoIndex + 1) + '/' + videoIds.length;
+        }
+
+        // Activar sonido (botón o primer clic/tecla en la página)
+        function enableSound() {
+            if (unmuted || !player || !player.unMute) return;
+            player.unMute();
+            player.setVolume(70);
+            player.playVideo();
+            unmuted = true;
+            soundBtn.classList.add('hidden');
+        }
+        soundBtn.addEventListener('click', e => { e.stopPropagation(); enableSound(); });
+        ['pointerdown', 'keydown'].forEach(ev =>
+            document.addEventListener(ev, enableSound, { once: true, passive: true })
+        );
+
         console.log("%c SISTEMA JARVIS INICIADO ", "background: #00f3ff; color: #000; font-weight: bold; padding: 4px; border-radius: 4px;");
+        console.log("%c Playlist cargada: " + videoIds.length + " videos", "color: #00f3ff;");
     </script>
 </body>
 </html>
